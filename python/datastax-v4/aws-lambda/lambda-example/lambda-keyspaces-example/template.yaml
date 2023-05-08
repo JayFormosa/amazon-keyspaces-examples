@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  lambda-keyspaces-example
+
+  SAM Template for lambda-keyspaces-example
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  ExampleKeyspace:
+    Type: AWS::Cassandra::Keyspace
+    Properties:
+      KeyspaceName: example_keyspace
+      Tags:
+        - Key: workload
+          Value: lambda-keyspaces-example
+          
+  ExampleTable:
+    Type: AWS::Cassandra::Table
+    Properties:
+      KeyspaceName: example_keyspace
+      TableName: example_table
+      PartitionKeyColumns:
+        - ColumnName: symbol
+          ColumnType: TEXT
+      RegularColumns:
+        - ColumnName: company
+          ColumnType: TEXT
+  
+  KeyspacesExampleFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: keyspaces_example_function_role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: keyspaces_access_policy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 'cassandra:Select'
+                Resource: 
+                  !Join 
+                    - ''
+                    - - 'arn:aws:cassandra:'
+                      - !Ref AWS::Region
+                      - ':'
+                      - !Ref AWS::AccountId
+                      - ':/keyspace/system*'
+    
+  KeyspacesExampleFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: keyspaces_example_function/
+      FunctionName: keyspaces_example_function
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Role: !GetAtt KeyspacesExampleFunctionRole.Arn
+      Architectures:
+        - x86_64
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  KeyspacesExampleFunction:
+    Description: "Keyspaces example lambda function ARN"
+    Value: !GetAtt KeyspacesExampleFunction.Arn
+  

@@ -1,0 +1,10 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "lambda-keyspaces-example"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-mn47h4kb09jg"
+s3_prefix = "lambda-keyspaces-example"
+region = "eu-west-2"
+capabilities = "CAPABILITY_NAMED_IAM"
+image_repositories = []
