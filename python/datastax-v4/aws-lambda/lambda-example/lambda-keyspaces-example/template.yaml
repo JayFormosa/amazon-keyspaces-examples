@@ -51,6 +51,22 @@ Resources:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
+                Action: 
+                  - 'cassandra:Create'
+                  - 'cassandra:Select'
+                  - 'cassandra:Modify'
+                Resource: 
+                  !Join 
+                    - ''
+                    - - 'arn:aws:cassandra:'
+                      - !Ref AWS::Region
+                      - ':'
+                      - !Ref AWS::AccountId
+                      - ':/keyspace/'
+                      - !Select [0,!Split ['|',!Ref ExampleTable]]
+                      - '/table/'
+                      - !Select [1,!Split ['|',!Ref ExampleTable]]
+              - Effect: Allow
                 Action: 'cassandra:Select'
                 Resource: 
                   !Join 
