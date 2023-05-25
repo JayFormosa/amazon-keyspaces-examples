@@ -35,6 +35,8 @@ def lambda_handler(event, context):
     record = json.loads(event['Records'][0]['body'])
     print(record)
     
+    # add code here to test for a session
+    
     stmt = session.prepare("INSERT INTO securities.dividend_history (symbol, company) VALUES (?, ?)")
     stmt.consistency_level = consistency_level=ConsistencyLevel.LOCAL_QUORUM
     session.execute(stmt, (record['symbol'],record['company']))
